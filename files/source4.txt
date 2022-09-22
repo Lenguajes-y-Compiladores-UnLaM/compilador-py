@@ -1,0 +1,29 @@
+var {
+    int potencia, cont;
+    real valor, acum;
+}
+
+out "Ingresar valor: ";
+in valor;
+
+out "Ingresar potencia: ";
+in potencia;
+
+/* Esto es otro comentario matador */
+
+if potencia == 0 {
+    acum = 1
+} else if potencia == 1 {
+    acum = valor
+} else {
+    acum = valor;
+    cont = 1;
+    
+    /* limite inferior inclusivo, limite exterior exclusivo */
+    while between(cont, 1:potencia) {
+        acum = acum * valor;
+        cont = cont + 1;
+    }
+}
+
+out "La potencia es " ++ acum

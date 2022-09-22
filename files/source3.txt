@@ -1,0 +1,17 @@
+var {
+	int valor;
+    string mensaje;
+}
+
+in valor;
+
+while valor != 0 {
+
+    mensaje = (valor >= 4) || (valor <= 8) ? "Dentro de rango" : "Fuera de rango";
+
+    out mensaje;
+
+    valor = valor - 1;
+}
+
+out .01 * 4. + . 

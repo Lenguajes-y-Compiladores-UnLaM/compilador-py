@@ -1,0 +1,15 @@
+var {
+	string mensaje;
+	int valor;
+}
+
+in valor;
+mensaje = "Ejemplo Print ";
+
+if valor > 4 {
+	mensaje = mensaje ++ "de Variable";
+} else {
+	mensaje = mensaje ++ "de Constante";
+}
+
+out mensaje;
