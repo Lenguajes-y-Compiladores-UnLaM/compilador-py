@@ -15,7 +15,8 @@ Tema del Grupo:
 
 ## Ejecucion
 Compilador:  
-```py main.py {path del sourcefile}```
+```py main.py {path del sourcefile}```  
+```py main.py {path del sourcefile} > {path del outputfile}```
 
 Tests:  
 ```py -m pytest -v --continue-on-collection-errors --no-header```  

@@ -1,5 +1,22 @@
+# -----------------------------------------------------------------------------------------------------------
+#                        === Matriz de Tokens ===
+# 
+# Matriz de Tokens asociadas a los estados del automata. 
+# La Mariz esta completa con los codigos correspondientes a cada Token.
+#
+# Matriz de 24x34
 # -1 --> Estado Final
 # -2 --> No hay Estado Eiguiente [ERROR]
+#
+#   Mapa de Tokens:
+#
+#       token_list                  - Par de Codigo de Token con su label.
+# 
+#    Funciones:
+#       get_token_id()              - Función que recibe posicion de Matriz y retorna codigo de token correspondiente.
+#       get_token_label()           - Función que recibe posicion de Matriz y retorna label de token correspondiente.
+# -----------------------------------------------------------------------------------------------------------
+
 # Matriz de 24x34
 token_table =  [
     [-2,   -2,	-2,	-2,	-2,	-2,	-2,	-2,	-2,	-2,	-2,	-2,	-2,	-2,	-2,	-2,	-2,	-2,	-2,	-2,	-2,	-2,	-2,	-1],
@@ -39,33 +56,33 @@ token_table =  [
 ]
 
 token_list = {
-    256: "ID",
-    257: "CTE_NUMERICA",
-    258: "CTE_REAL",
-    259: "CTE_STRING",
-    270: "LLAVE_ABRE",
-    271: "LLAVE_CIERRA",
-    272: "PARENTESIS_ABRE",
-    273: "PARENTESIS_CIERRA",
-    274: "PUNTO_COMA",
-    275: "COMA",
-    276: "OP_RESTA",
-    277: "OP_SUMA",
-    278: "OP_DIVISION",
-    279: "OP_MULTIPLICACION",
-    280: "OP_CONCAT",
-    281: "COMP_MENOR",
-    282: "COMP_MAYOR",
-    283: "COMP_MENOR_IGUAL",
-    284: "COMP_MAYOR_IGUAL",
-    285: "COMP_IGUAL",
-    286: "COMP_DISTINTO",
-    287: "OP_OR",
-    288: "OP_AND",
-    289: "OP_NOT",
-    290: "OP_ASIGNACION",
-    291: "CONDICION_TERNARIA",
-    292: "DOS_PUNTOS"
+    256: { "type": "ID", "value": None},
+    257: { "type": "CTE_NUMERICA", "value": None},
+    258: { "type": "CTE_REAL", "value": None},
+    259: { "type": "CTE_STRING", "value": None},
+    270: { "type": "LLAVE_ABRE", "value": "{"},
+    271: { "type": "LLAVE_CIERRA", "value": "}"},
+    272: { "type": "PARENTESIS_ABRE", "value": "("},
+    273: { "type": "PARENTESIS_CIERRA", "value": ")"},
+    274: { "type": "PUNTO_COMA", "value": ";"},
+    275: { "type": "COMA", "value": ","},
+    276: { "type": "OP_RESTA", "value": "-"},
+    277: { "type": "OP_SUMA", "value": "+"},
+    278: { "type": "OP_DIVISION", "value": "/"},
+    279: { "type": "OP_MULTIPLICACION", "value": "*"},
+    280: { "type": "OP_CONCAT", "value": "++"},
+    281: { "type": "COMP_MENOR", "value": "<"},
+    282: { "type": "COMP_MAYOR", "value": ">"},
+    283: { "type": "COMP_MENOR_IGUAL", "value": "<="},
+    284: { "type": "COMP_MAYOR_IGUAL", "value": ">="},
+    285: { "type": "COMP_IGUAL", "value": "=="},
+    286: { "type": "COMP_DISTINTO", "value": "!="},
+    287: { "type": "OP_OR", "value": "||"},
+    288: { "type": "OP_AND", "value": "&&"},
+    289: { "type": "OP_NOT", "value": "!"},
+    290: { "type": "OP_ASIGNACION", "value": "="},
+    291: { "type": "CONDICION_TERNARIA", "value": "?"},
+    292: { "type": "DOS_PUNTOS", "value": ":"}
 }
 
 

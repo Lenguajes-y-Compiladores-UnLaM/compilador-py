@@ -12,9 +12,9 @@ in potencia;
 /* Esto es otro comentario matador */
 
 if potencia == 0 {
-    acum = 1
+    acum = 1;
 } else if potencia == 1 {
-    acum = valor
+    acum = valor;
 } else {
     acum = valor;
     cont = 1;
@@ -26,4 +26,4 @@ if potencia == 0 {
     }
 }
 
-out "La potencia es " ++ acum
+out "La potencia es " ++ acum;

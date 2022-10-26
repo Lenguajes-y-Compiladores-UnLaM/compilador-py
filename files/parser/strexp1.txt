@@ -1,0 +1,2 @@
+str = "Hola mundo";
+str2 = "Hola mundo";

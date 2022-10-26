@@ -1,0 +1,10 @@
+if num1 < 10 {
+    while num1 > 0 {
+        out num1;
+        num1 = num1 - 1;
+    }
+} else if num < 20 {
+    out "mayor a 10 y menor a 20";
+} else {
+    out "mayor a 20";
+}

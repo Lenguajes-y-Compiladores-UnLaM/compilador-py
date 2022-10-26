@@ -1,6 +1,50 @@
-# -1 --> Estado Final
-# -2 --> No hay Estado Eiguiente [ERROR]
-# Matriz de 26x32
+# -----------------------------------------------------------------------------------------------------------
+#                        === Matriz de Siguiente Estado ===
+# 
+# Matriz de siguiente estado asociada al Automata Finito. 
+# La Mariz esta completa con valores correspondientes a los siguientes estados que deberán transicionarse en caso de estar en un correspondiente estado.
+# 
+# # Matriz de 24x33
+#
+#   Estados:
+#       0                           - Estado Inicial
+#       -1                          - Estado Final
+#       -2                          - No hay estado siguiente [ERROR]
+#       1                           - Generar String
+#       2                           - Generar INT  
+#       3                           - Pasar de INT a REAL con el .
+#       4                           - Iniciar String "
+#       5                           - Finalizar String "
+#       6                           - Posible Comentario o Operador Division
+#       7                           - Comentario Confirmado
+#       8                           - Posible Continuar Comentario o Finalizar Comentario
+#       9                           - Llave abre
+#       10                          - Llave cierra
+#       11                          - Parentesis Abre
+#       12                          - Parentesis Cierra
+#       13                          - Posible Operador + o Futura Concatenacion
+#       14                          - Confirmacion Operador ++ Concatenación String
+#       15                          - Operador -
+#       16                          - Operador *
+#       17                          - Posible Operador < o Futuro <=
+#       18                          - Confirmacion Operador <=
+#       19                          - Posible Operador > o Futuro >=
+#       20                          - Confirmacion Operador >=
+#       21                          - Posible Operador ! o Futuro !=
+#       22                          - Confirmacion Operador !=
+#       23                          - Posible Operador = o Futuro ==
+#       24                          - Confirmacion Operador ==
+#       25                          - Inicializar Operador OR |
+#       26                          - Confirmar Operador OR ||
+#       27                          - Inicializar Operador AND &
+#       28                          - Confirmar Operador AND &&
+#       29                          - Punto y Coma ;
+#       30                          - Coma ,
+#       31                          - Dos Puntos :
+#       32                          - Generar REAL
+#       33                          - Operador Ternario ?
+# -----------------------------------------------------------------------------------------------------------
+
 next_state = [
     [1,	    2,	4,	9,	10,	11,	12,	32,	29,	30,	15,	13,	6,	16,	17,	19,	25,	27,	21,	23,	31,	33,	0,	-1],
     [1,	    1,	-1,	-1,	-1,	-1,	-1,	-1,	-1,	-1,	-1,	-1,	-1,	-1,	-1,	-1,	-1,	-1,	-1,	-1,	-1,	-1,	-1,	-1],

@@ -7,11 +7,11 @@ in valor;
 
 while valor != 0 {
 
-    mensaje = (valor >= 4) || (valor <= 8) ? "Dentro de rango" : "Fuera de rango";
+    mensaje = valor >= 4 || valor <= 8 ? "Dentro de rango" : "Fuera de rango";
 
     out mensaje;
 
     valor = valor - 1;
 }
 
-out .01 * 4. + . 
+out (.01 * 4.);

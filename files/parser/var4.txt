@@ -1,0 +1,5 @@
+var {
+    int num, num2, num3;
+    real num4;
+    string str, str2;
+}

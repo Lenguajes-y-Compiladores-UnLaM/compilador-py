@@ -1,25 +1,16 @@
 import sys
-from lex import lexico
+from parser import sintactico
 
 def main(path):
     with open(path) as source:
-        while True:
-            character = source.read(1)
-            
-            if not character:
-                print("End of file")
-                break
-            
-            response = lexico.yylex(source, character)
-            
-            if not response["ok"]:
-                print(f"[Error en Lexico]: {response['token']}")
-                break
-            
-            print("[TOKEN]: ", response["token"])
-            
+        data = source.read()  
+        polaca = sintactico.parse(data)
+        for (i, item) in enumerate(polaca):
+            print(i, item)
     source.close()
     
 
 if __name__ == "__main__":
-    main(sys.argv[1])
+    # with open('out/out.txt', 'w') as f:
+    #   sys.stdout = f # Comentar para ver los logs
+        main(sys.argv[1])

@@ -1,0 +1,7 @@
+if num1 < 10 {
+    v1 = 3;
+} else if num < 20 {
+    v1 = 6;
+} else {
+    v1 = 9;
+}

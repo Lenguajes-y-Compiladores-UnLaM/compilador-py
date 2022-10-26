@@ -1,5 +1,5 @@
 var {
-    string mensaje;
+    string mensaje, hola;
 }
 
 in mensaje;
