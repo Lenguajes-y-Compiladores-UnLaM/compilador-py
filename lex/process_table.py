@@ -73,7 +73,7 @@ def add_string_id(char):
 def save_string_id(_):
     global id
     if kt.keyword_token_label(id)["type"] == "ID":
-        return st.SymbolsTable().append({ 'value': None, 'name': id, 'typeOf': None, 'length': 0})
+        return st.SymbolsTable().append({ 'value': None, 'name': f'_{id}', 'typeOf': None, 'length': 0})
     return id
 
 def start_int(char):
@@ -110,7 +110,7 @@ def add_real(char):
 
 def save_real(_):
     global cte_numerica
-    return st.SymbolsTable().append({ 'value': float(cte_numerica), 'name': f"${cte_numerica}", 'typeOf': 'REAL', 'length': len(cte_numerica)})
+    return st.SymbolsTable().append({ 'value': float(cte_numerica), 'name': f"${cte_numerica.replace('.', '_')}", 'typeOf': 'REAL', 'length': len(cte_numerica)})
 
 def start_string(char):
     global id, counter
@@ -129,7 +129,7 @@ def add_string(char):
 def save_string(_):
     global id
     global lastSymbolIndex
-    lastSymbolIndex = st.SymbolsTable().append({ 'value': id, 'name': f"${id}", 'typeOf': 'STRING', 'length': len(id)})
+    lastSymbolIndex = st.SymbolsTable().append({ 'value': id, 'name': f"@{id.replace(' ', '_')}", 'typeOf': 'STRING', 'length': len(id)})
     return lastSymbolIndex
 
 def get_string_index(_):

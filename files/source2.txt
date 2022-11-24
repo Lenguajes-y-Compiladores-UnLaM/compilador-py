@@ -1,12 +1,14 @@
 var {
 	string mensaje;
 	int valor;
+	bool flag;
 }
 
 in valor;
 mensaje = "Ejemplo Print ";
 
-if valor > 4 {
+if flag {
+	valior = 3;
 	mensaje = mensaje ++ "de Variable";
 } else {
 	mensaje = mensaje ++ "de Constante";

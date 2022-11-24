@@ -1,11 +1,10 @@
 import sys
 from parser import yacc
 from lex import lexico, symbols_table
+from flags import debug
 
 st = symbols_table.SymbolsTable()
 
-debug = False
-info = True
         
 tokens = ("ID", "CTE_NUMERICA", "CTE_REAL", "CTE_STRING",
           "LLAVE_ABRE", "LLAVE_CIERRA", "PARENTESIS_ABRE", "PARENTESIS_CIERRA",
@@ -19,21 +18,66 @@ tokens = ("ID", "CTE_NUMERICA", "CTE_REAL", "CTE_STRING",
           "var", "string", "int", "real", "bool", "true", "false")
 
 polaca = []
-ifConditionAux = None
+
+betweenId = None
+betweenMinJmp = None
+betweenMaxJmp = None
+
+ifConditionAux = []
 ifEndAux = []
+
+ternaryJmpToFalsAux = None
+ternaryJmpToEndAux = None
+
+whileConditionAux = []
+whileStartAux = []
+
+andJmpAux = None
+orJmpAux = None
+
+variableTypeAux = None
+defaultValueAux = None
+
+operantionTypeAux = None
+def validOperationType(operand):
+    global operantionTypeAux
+    if not operantionTypeAux:
+        operantionTypeAux = operand.typeOf
+        return True
+    if operantionTypeAux != operand.typeOf:
+        thrown(f"Cant operate {operantionTypeAux} with {operand.typeOf}")
+        
+def validAssignmentType(operand):
+    global operantionTypeAux
+    if operantionTypeAux != operand.typeOf:
+        thrown(f"Cant assign value of type {operantionTypeAux} to {operand.typeOf}")
+        
+def definedVariable(symbol):
+    if not symbol.typeOf: 
+        thrown(f"Variable {symbol.name} not defined")
+
+def thrown(error):
+    print(f'\n[ERROR: {error}]\n')
+    raise SyntaxError(error)
+
+def appendVars():
+    st.append({ 'value': 1, 'name': "_TRUE", 'typeOf': 'BOOL', 'length': 1})
+    st.append({ 'value': 0, 'name': "_FALSE", 'typeOf': 'BOOL', 'length': 1})
+    st.append({ 'value': 0, 'name': "@logicalAux", 'typeOf': 'BOOL', 'length': 1})
+    st.append({ 'value': '', 'name': "@strAux", 'typeOf': 'STRING', 'length': 0})
 
 # ------------------------- Rules
 ## ------------------------------ Program 
 def p_program_with_variables(p):
     ''' program : variables_block statements '''
     if debug: print(''' program : variables_block statements ''')
-    if info: print(f'program: {p[1]}')
-    p[0] = p[1]
+    appendVars()
+    p[0] = polaca
 
 def p_program(p):
     ''' program : statements '''
     if debug: print(''' program : statements ''')
-    if info: print(f'program: {p[1]}')
+    appendVars()
     p[0] = polaca
 
 
@@ -56,6 +100,24 @@ def p_variables_list(p):
 def p_variable_declaration(p):
     ''' variable_declaration : variable_type variables_names PUNTO_COMA '''
     if debug: print(''' variable_declaration : variable_type variables_names PUNTO_COMA ''')
+    pass
+
+def p_variables_names_r(p):
+    ''' variables_names : variables_names COMA ID '''
+    global variableTypeAux, defaultValueAux
+    symbol = st.getByIndex(p[3])
+    if debug: print(f''' variables_names : variables_names COMA ID[{symbol.name}] ''')
+    symbol.typeOf = variableTypeAux
+    symbol.value = defaultValueAux
+
+def p_variables_names(p):
+    ''' variables_names : ID '''
+    global variableTypeAux, defaultValueAux
+    symbol = st.getByIndex(p[1])
+    if debug: print(f''' variables_names : ID[{symbol.name}] ''')
+    symbol.typeOf = variableTypeAux
+    symbol.value = defaultValueAux
+=======
     if info: print(f''' variable_declaration : {p[1]} {st.getByIndex(p[2])} ''')
     p[0] = p[1]
 
@@ -74,72 +136,94 @@ def p_variables_names(p):
 ### ----------------------------------- Variable Types
 def p_variable_type_int(p):
     ''' variable_type : int '''
+    global variableTypeAux, defaultValueAux
     if debug: print(''' variable_type : int ''')
-    p[0] = 'int'
+    variableTypeAux = 'INT'
+    defaultValueAux = 0
 
 def p_variable_type_real(p):
     ''' variable_type : real '''
+    global variableTypeAux, defaultValueAux
     if debug: print(''' variable_type : real ''')
-    pass
+    variableTypeAux = 'REAL'
+    defaultValueAux = 0.0
 
 def p_variable_type_string(p):
     ''' variable_type : string '''
+    global variableTypeAux, defaultValueAux
     if debug: print(''' variable_type : string ''')
-    pass
+    variableTypeAux = 'STRING'
+    defaultValueAux = ""
 
 def p_variable_type_bool(p):
     ''' variable_type : bool '''
+    global variableTypeAux, defaultValueAux
     if debug: print(''' variable_type : bool ''')
-    pass
+    variableTypeAux = 'BOOL'
+    defaultValueAux = 1
 
 
 ## ------------------------------ Statements
 def p_statements(p):
     ''' statements : statement '''
     if debug: print(''' statements : statement ''')
-    if info: print(f'statements : {p[1]}')
-    p[0] = p[1]
+    pass
     
 def p_statements_r(p):
     ''' statements : statements statement '''
     if debug: print(''' statements : statements statement ''')
-    p[0] = p[1]
+    pass
 
 def p_statement_assignment(p):
     ''' statement : assignment_statement '''
-    if debug: print(f''' statement : assignment_statement[{p[1]}]''')
-    if info: print(f'statement : {p[1]}')
-    p[0] = p[1]
+    if debug: print(f''' statement : assignment_statement''')
+    pass
 
 def p_statement_select(p):
     ''' statement : select_statement '''
     if debug: print(''' statement : select_statement ''')
-    # p[0] = p[1]
     pass
 
 def p_statement_while(p):
     ''' statement : while_statement '''
     if debug: print(''' statement : while_statement ''')
-    # p[0] = p[1]
     pass
 
 def p_statement_in(p):
     ''' statement : in_statement '''
     if debug: print(''' statement : in_statement ''')
-    # p[0] = p[1]
     pass
 
 def p_statement_out(p):
     ''' statement : out_statement '''
     if debug: print(''' statement : out_statement ''')
-    # p[0] = p[1]
     pass
 
 ### ----------------------------------- While Statement
+def p_while_keyword(p):
+    ''' while_keyword : while '''
+    if debug: print(f''' while_keyword : while ''')
+    polaca.append("START_WHILE")
+    whileStartAux.append(len(polaca))
+
+def p_while_condition(p):
+    ''' while_condition : logical_statement '''
+    global whileConditionAux
+    if debug: print(f''' while_condition : logical_statement ''')
+    polaca.append("_TRUE")
+    polaca.append("@logicalAux")
+    polaca.append("CMP")
+    polaca.append("JZ")
+    whileConditionAux.append(len(polaca))
+    polaca.append("_")
+
 def p_while_statement(p):
-    ''' while_statement : while logical_statement LLAVE_ABRE statements LLAVE_CIERRA '''
-    if debug: print(f''' while_statement : while logical_statement[{p[2]}] LLAVE_ABRE statements LLAVE_CIERRA ''')
-    pass
+    ''' while_statement : while_keyword while_condition LLAVE_ABRE statements LLAVE_CIERRA '''
+    global whileEndAux
+    if debug: print(f''' while_statement : while_keyword while_copndition LLAVE_ABRE statements LLAVE_CIERRA ''')
+    polaca.append("J")
+    polaca.append(f'[{whileStartAux.pop()}]')
+    polaca[whileConditionAux.pop()] = f'[{len(polaca)}]'
 
 ### ----------------------------------- Select Statement
 def p_select_statement_with_else_if(p):
@@ -160,23 +244,22 @@ def p_select_statement(p):
 def p_if_condition(p):
     ''' if_condition :  logical_statement '''
     global ifConditionAux
-    if debug: print(f''' if_statement :  if logical_statement[{p[2]}] LLAVE_ABRE statements LLAVE_CIERRA ''')
-    polaca.append("logicalAux")
+    if debug: print(f''' if_condition :  logical_statement ''')
+    polaca.append("_TRUE")
+    polaca.append("@logicalAux")
     polaca.append("CMP")
     polaca.append("JZ")
-    ifConditionAux = len(polaca)
-    polaca.append("_")
-    print(ifConditionAux)
-    print(polaca)  
+    ifConditionAux.append(len(polaca))
+    polaca.append("_") 
 
 def p_if_statement(p):
     ''' if_statement :  if if_condition LLAVE_ABRE statements LLAVE_CIERRA '''
     global ifConditionAux
-    if debug: print(f''' if_statement :  if logical_statement[{p[2]}] LLAVE_ABRE statements LLAVE_CIERRA ''')
+    if debug: print(f''' if_statement :  if if_condition LLAVE_ABRE statements LLAVE_CIERRA ''')
     polaca.append("J")
     ifEndAux.append(len(polaca))
-    polaca.append("_")
-    polaca[ifConditionAux] = len(polaca)
+    polaca.append(f"[{len(polaca) + 1}]")
+    polaca[ifConditionAux.pop()] = f"[{len(polaca)}]"
 
 def p_else_if_statement(p):
     ''' else_if_statement : else if_statement '''
@@ -198,127 +281,136 @@ def p_else_statement(p):
     global ifEndAux
     if debug: print(''' else_statement : else LLAVE_ABRE statements LLAVE_CIERRA ''')
     for e in ifEndAux:
-        polaca[e] = len(polaca)
+        polaca[e] = f"[{len(polaca)}]"
     ifEndAux = []
 
 
 ### ----------------------------------- Out Statement
 def p_out_statement(p):
     ''' out_statement : out str_expression PUNTO_COMA '''
-    if debug: print(f''' out_statement : out str_expression[{p[2]}] PUNTO_COMA ''')
-    # p[0] = p[1]
-    pass
+    global operantionTypeAux
+    if debug: print(f''' out_statement : out str_expression PUNTO_COMA ''')
+    operantionTypeAux = None
+    polaca.append('PUT')
 
 ### ----------------------------------- In Statement
 def p_in_statement(p):
     ''' in_statement : in ID PUNTO_COMA '''
-    if debug: print(f''' in_statement : in ID[{p[2]}] PUNTO_COMA ''')
-    # p[0] = p[1]
-    pass
+    symbol = st.getByIndex(p[2])
+    if debug: print(f''' in_statement : in ID[{symbol.name}] PUNTO_COMA ''')
+    definedVariable(symbol)
+    polaca.append(symbol.name)
+    polaca.append('GET')
 
 ## ------------------------------ Arithmetic Operations
 ### ----------------------------------- Expression
 def p_expression_plus(p):
     ''' expression : expression OP_SUMA term '''
-    if debug: print(f''' expression : expression[{p[1]}] OP_SUMA term[{p[3]}] ''')
-    if info: print(f'expression: {p[1]},  {p[3]}, +')
+    if debug: print(f''' expression : expression OP_SUMA term ''')
     polaca.append("+")
     
 def p_expression_minus(p):
     ''' expression : expression OP_RESTA term '''
-    if debug: print(f''' expression : expression[{p[1]}] OP_RESTA term[{p[3]}] ''')
-    if info: print(f'expression: {p[1]}, {p[3]}, -')
+    if debug: print(f''' expression : expression OP_RESTA term ''')
     polaca.append("-")
 
 def p_expression(p):
     ''' expression : term '''
-    if debug: print(f''' expression : term[{p[1]}] ''')
-    if info: print(f'expression: {p[1]}')
+    if debug: print(f''' expression : term ''')
+    pass
 
 ### ----------------------------------- Term
 def p_term_multp(p):
     ''' term : term OP_MULTIPLICACION factor '''
-    if debug: print(f''' term : term[{p[1]}] OP_MULTIPLICACION factor[{p[3]}] ''')
-    if info: print(f'term: {p[1]} * {p[3]}')
+    if debug: print(f''' term : term OP_MULTIPLICACION factor ''')
     polaca.append("*")
     
 def p_term_div(p):
     ''' term : term OP_DIVISION factor '''
-    if debug: print(f''' term : term[{p[1]}] OP_DIVISION factor[{p[3]}] ''')
-    if info: print(f'term: {p[1]} / {p[3]}')
+    if debug: print(f''' term : term OP_DIVISION factor ''')
     polaca.append("/")
     
 def p_term(p):
     ''' term : factor '''
-    if debug: print(f''' term : factor[{p[1]}] ''')
-    if info: print(f'term: {p[1]}')
+    if debug: print(f''' term : factor ''')
+    pass
     
 ### ----------------------------------- Factor
 def p_factor_num(p):
     ''' factor : CTE_NUMERICA '''
-    if debug: print(f''' factor : CTE_NUMERICA[{p[1]}] ''') 
-    if info: print(f'factor: {p[1]}')
-    polaca.append(st.getByIndex(p[1]).value)
+    global operantionTypeAux
+    symbol = st.getByIndex(p[1])
+    if debug: print(f''' factor : CTE_NUMERICA[{symbol.name}] ''') 
+    validOperationType(symbol)
+    polaca.append(symbol.name)
     
 def p_factor_real(p):
     ''' factor : CTE_REAL '''
-    if debug: print(f''' factor : CTE_REAL[{p[1]}] ''') 
-    if info: print(f'factor: {p[1]}')
-    polaca.append(st.getByIndex(p[1]).value)
+    global operantionTypeAux
+    symbol = st.getByIndex(p[1])
+    if debug: print(f''' factor : CTE_REAL[{symbol.name}] ''') 
+    validOperationType(symbol)
+    polaca.append(symbol.name)
     
 def p_factor_id(p):
     ''' factor : ID ''' 
-    if debug: print(f''' factor : ID[{p[1]}] ''' )
-    if info: print(f'factor: {p[1]}')
-    polaca.append(st.getByIndex(p[1]))
+    global operantionTypeAux
+    symbol = st.getByIndex(p[1])
+    if debug: print(f''' factor : ID[{symbol.name}] ''' )
+    definedVariable(symbol)
+    validOperationType(symbol)
+    polaca.append(symbol.name)
     
 def p_factor_expression(p):
     ''' factor : PARENTESIS_ABRE expression PARENTESIS_CIERRA ''' 
-    if debug: print(f''' factor : PARENTESIS_ABRE expression[{p[2]}] PARENTESIS_CIERRA ''' )
-    if info: print(f'factor: ({p[2]})')
+    if debug: print(f''' factor : PARENTESIS_ABRE expression PARENTESIS_CIERRA ''' )
+    pass
     
 def p_factor_negative(p):
     ''' factor : OP_RESTA factor '''
-    if debug: print(f''' factor : OP_RESTA term[{p[2]}] ''')
-    if info: print(f'factor: {-p[2]}')
-    polaca.append("-")
+    if debug: print(f''' factor : OP_RESTA term ''')
+    polaca.append("NEGATIVE")
+    
 
 ## ------------------------------ String Expression
 def p_str_expression_concat(p):
     ''' str_expression : str_term OP_CONCAT str_term '''
-    if debug: print(f''' str_expression : str_term[{p[1]}] OP_CONCAT str_term[{p[3]}] ''')
-    if info: print(f''' str_expression : {st.getByIndex(p[1])}, {st.getByIndex(p[3])}, ++ ''')
-    p[0] = f'{p[1]}, {p[3]}, ++'
+    global operantionTypeAux
+    if debug: print(f''' str_expression : str_term OP_CONCAT str_term ''')
+    operantionTypeAux = "STRING"
+    polaca.append("CONCAT")
 
 def p_str_expression(p):
     ''' str_expression : str_term '''
-    if debug: print(f''' str_expression : str_term[{p[1]}] ''')
-    if info: print(f''' str_expression : {st.getByIndex(p[1])} ''')
-    p[0] = p[1]
+    global operantionTypeAux
+    if debug: print(f''' str_expression : str_term ''')
+    operantionTypeAux = "STRING"
+    pass
 
 def p_str_term_cte(p):
     ''' str_term : CTE_STRING '''
-    if debug: print(f''' str_term : CTE_STRING[{p[1]}] ''')
-    if info: print(f''' str_term : {st.getByIndex(p[1])} ''')
-    p[0] = p[1]
+    symbol = st.getByIndex(p[1])
+    if debug: print(f''' str_term : CTE_STRING[{symbol.name}] ''')
+    polaca.append(symbol.name)
     
 def p_str_term_id(p):
     ''' str_term : ID '''
-    if debug: print(f''' str_term : ID[{p[1]}] ''')
-    if info: print(f''' str_term : {p[1]} ''')
-    p[0] = p[1]
+    symbol = st.getByIndex(p[1])
+    if debug: print(f''' str_term : ID[{symbol.name}] ''')
+    definedVariable(symbol)
+    polaca.append(symbol.name)
 
 
 ## ------------------------------ Comparision Operations
 def p_comparision(p):
     ''' comparision : expression op_comparision expression '''
-    if debug: print(f''' comparision : expression[{p[1]}] op_comparision[{p[2]}] expression[{p[3]}] ''')
+    if debug: print(f''' comparision : expression op_comparision[{p[2]}] expression ''')
     polaca.append("CMP")
     polaca.append(p[2])
 
 def p_comparision_str(p):
     ''' comparision : str_expression op_comparision str_expression '''
-    if debug: print(f''' comparision : str_expression[{p[1]}] op_comparision[{p[2]}] str_expression[{p[3]}] ''')
+    if debug: print(f''' comparision : str_expression op_comparision[{p[2]}] str_expression ''')
     polaca.append("CMP")
     polaca.append(p[2])
 
@@ -326,37 +418,31 @@ def p_comparision_str(p):
 def p_op_comparision_minor(p):
     ''' op_comparision : COMP_MENOR '''
     if debug: print(''' op_comparision : COMP_MENOR ''')
-    if info: print(f'comparision: {p[1]}')
     p[0] = "JGE"
 
 def p_op_comparision_major(p):
     ''' op_comparision : COMP_MAYOR '''
-    if debug: print(f''' op_comparision : {p[1]} COMP_MAYOR ''')
-    if info: print(f'comparision: {p[1]}')
+    if debug: print(f''' op_comparision : COMP_MAYOR ''')
     p[0] = "JLE"
 
 def p_op_comparision_minor_eq(p):
     ''' op_comparision : COMP_MENOR_IGUAL '''
     if debug: print(''' op_comparision : COMP_MENOR_IGUAL ''')
-    if info: print(f'comparision: {p[1]}')
     p[0] = "JG"
 
 def p_op_comparision_major_eq(p):
     ''' op_comparision : COMP_MAYOR_IGUAL '''
     if debug: print(''' op_comparision : COMP_MAYOR_IGUAL ''')
-    if info: print(f'comparision: {p[1]}')
     p[0] = "JL"
 
 def p_op_comparision_equal(p):
     ''' op_comparision : COMP_IGUAL '''
     if debug: print(''' op_comparision : COMP_IGUAL ''')
-    if info: print(f'comparision: {p[1]}')
     p[0] = "JNE"
 
 def p_op_comparision_distinct(p):
     ''' op_comparision : COMP_DISTINTO '''
     if debug: print(''' op_comparision : COMP_DISTINTO ''')
-    if info: print(f'comparision: {p[1]}')
     p[0] = "JE"
 
 
@@ -364,115 +450,253 @@ def p_op_comparision_distinct(p):
 ### ----------------------------------- Logical Statement
 def p_logical_statement(p):
     ''' logical_statement : logical_expression '''
-    if debug: print(f''' logical_statement : logical_expression[{p[1]}] ''')
-    polaca.append("+6")
-    polaca.append("1")
-    polaca.append("logicalAux")
+    if debug: print(f''' logical_statement : logical_expression ''')
+    polaca.append(f"[{len(polaca) + 6}]")
+    polaca.append("_TRUE")
     polaca.append(":=")
+    polaca.append("@logicalAux")
     polaca.append("J")
-    polaca.append("+4")
-    polaca.append("0")
-    polaca.append("logicalAux")
+    polaca.append(f"[{len(polaca) + 4}]")
+    polaca.append("_FALSE")
     polaca.append(":=")
+    polaca.append("@logicalAux")
+    
+# def p_logical_expression_not(p):
+#     ''' logical_statement : OP_NOT logical_expression '''
+#     if debug: print(f''' logical_expression : OP_NOT[{p[1]}] logical_term[{p[2]}] ''')
+#     if info: print(f'logical_expression: {p[1]}, {p[2]}')
+#     polaca.append(len(polaca) + 6)
+#     polaca.append(0)
+#     polaca.append("@logicalAux")
+#     polaca.append(":=")
+#     polaca.append("J")
+#     polaca.append(len(polaca) + 4)
+#     polaca.append(1)
+#     polaca.append("@logicalAux")
+#     polaca.append(":=")
+# ''' logical_statement : left_or_expression OP_OR OP_NOT logical_expression '''
+# ''' logical_statement : OP_NOT left_or_expression OP_OR logical_expression '''
+# ''' logical_statement : OP_NOT left_or_expression OP_OR OP_NOT logical_expression '''
 
 def p_logical_statement_or_operator(p):
-    ''' logical_statement : logical_expression OP_OR logical_expression '''
-    if debug: print(f''' logical_statement : logical_expression[{p[1]}] OR logical_expression[{p[3]}] ''')
-    if info: print(f'logical_statement: {p[1]}, OR, {p[2]}')
-    polaca.append("or")
+    ''' logical_statement : left_or_expression OP_OR logical_expression '''
+    global orJmpAux
+    if debug: print(f''' logical_statement : left_or_expression OR logical_expression ''')
+    polaca.append(f"[{len(polaca) + 4}]")
+    polaca[orJmpAux] = f"[{len(polaca)}]"
+    polaca.append("_TRUE")
+    polaca.append('J')
+    polaca.append(f"[{len(polaca) + 2}]")
+    polaca.append("_FALSE")
+    polaca.append(':=')
+    polaca.append('@logicalAux')
+
+def p_logical_left_or_expression(p):
+    ''' left_or_expression : logical_expression '''
+    global orJmpAux
+    if debug: print(f''' left_or_expression : logical_expression ''')
+    polaca.append(f"[{len(polaca) + 3}]")
+    polaca.append('J')
+    orJmpAux = len(polaca)
+    polaca.append('_')
 
 def p_logical_statement_and_operator(p):
-    ''' logical_statement : logical_expression OP_AND logical_expression '''
-    if debug: print(f''' logical_statement : logical_expression[{p[1]}] AND logical_expression[{p[3]}] ''')
-    if info: print(f'logical_statement: {p[1]}, AND, {p[2]}')
-    polaca.append("and")
+    ''' logical_statement : left_and_expression OP_AND logical_expression '''
+    global andJmpAux
+    if debug: print(f''' logical_statement : left_and_expression AND logical_expression ''')
+    polaca.append(f"[{len(polaca) + 4}]")
+    polaca.append("_TRUE")
+    polaca.append("J")
+    polaca.append(f"[{len(polaca) + 2}]")
+    
+    polaca[andJmpAux] = f"[{len(polaca)}]"
+    polaca.append("_FALSE")
+    
+    polaca.append(":=")
+    polaca.append("@logicalAux")
+
+def p_logical_left_and_expression(p):
+    ''' left_and_expression : logical_expression '''
+    global andJmpAux
+    if debug: print(f''' left_and_expression : logical_expression ''')
+    andJmpAux = len(polaca)
+    polaca.append("_")
 
 ### ----------------------------------- Logical Expression
-def p_logical_expression_not(p):
+def p_logical_not_expression(p):
     ''' logical_expression : OP_NOT logical_term '''
-    if debug: print(f''' logical_expression : OP_NOT[{p[1]}] logical_term[{p[2]}] ''')
-    if info: print(f'logical_expression: {p[1]}, {p[2]}')
-    polaca.append("not")
-
+    global operantionTypeAux
+    if debug: print(f''' logical_expression : logical_term ''')
+    operantionTypeAux = None
+    polaca.append('NOT')
+    
 def p_logical_expression(p):
     ''' logical_expression : logical_term '''
-    if debug: print(f''' logical_expression : logical_term[{p[1]}] ''')
+    global operantionTypeAux
+    if debug: print(f''' logical_expression : logical_term ''')
+    operantionTypeAux = None
+    pass
 
 ### ----------------------------------- Logical Term
 def p_logical_term_comparision(p):
     ''' logical_term : comparision '''
-    if debug: print(f''' logical_term : comparision[{p[1]}] ''')
+    if debug: print(f''' logical_term : comparision ''')
+    pass
 
 def p_logical_term_between(p):
     ''' logical_term : between_statement '''
-    if debug: print(f''' logical_term : between_statement[{p[1]}] ''')
+    if debug: print(f''' logical_term : between_statement ''')
+    pass
 
 def p_logical_term_cte(p):
     ''' logical_term : cte_logic '''
-    if debug: print(f''' logical_term : cte_logic[{p[1]}] ''')
-    if info: print(f'logical_term :{p[1]}')
+    if debug: print(f''' logical_term : cte_logic ''')
+    pass
+    
 
 ### ----------------------------------- Logical Constants
 def p_cte_logic_true(p):
     ''' cte_logic : true '''
-    if debug: print(f''' cte_logic : true[{p[1]}] ''')
-    if info: print(f'cte_logic: {p[1]}')
-    polaca.append("1")
+    if debug: print(f''' cte_logic : true ''')
+    polaca.append("_TRUE")
+    polaca.append("_TRUE")
+    polaca.append("CMP")
+    polaca.append("JZ")
 
 def p_cte_logic_false(p):
     ''' cte_logic : false '''
-    if debug: print(f''' cte_logic : false[{p[1]}] ''')
-    if info: print(f'cte_logic: {p[1]}')
-    polaca.append("0")
+    if debug: print(f''' cte_logic : false ''')
+    polaca.append("_TRUE")
+    polaca.append("_FALSE")
+    polaca.append("CMP")
+    polaca.append("JZ")
 
 ### ----------------------------------- Between Statement
 def p_between_statement(p):
-    ''' between_statement : between PARENTESIS_ABRE ID COMA expression DOS_PUNTOS expression PARENTESIS_CIERRA '''
-    if debug: print(f''' between_statement : between PARENTESIS_ABRE ID[{p[3]}] COMA expression[{p[5]}] DOS_PUNTOS expression[{p[7]}] PARENTESIS_CIERRA ''')
-    if info: print(f'between: {p[3]}, {p[5]}, >=, {p[3]}, {p[7]}, <=, &&')
-    p[0] = f'{p[3]}, {p[5]}, >=, {p[3]}, {p[7]}, <=, &&'
+    ''' between_statement : between PARENTESIS_ABRE between_id COMA between_min DOS_PUNTOS between_max PARENTESIS_CIERRA '''
+    global betweenMinJmp, betweenMaxJmp, operantionTypeAux
+    if debug: print(f''' between_statement : between PARENTESIS_ABRE between_id COMA between_min DOS_PUNTOS between_max PARENTESIS_CIERRA ''')
+    polaca.append("_TRUE")
+    polaca.append("J")
+    polaca.append(f"[{len(polaca) + 2}]")
+    
+    polaca[betweenMinJmp] = f"[{len(polaca)}]"
+    polaca[betweenMaxJmp] = f"[{len(polaca)}]"
+    polaca.append("_FALSE")
+    
+    polaca.append("_TRUE")
+    polaca.append("CMP")
+    polaca.append("JZ")
+    operantionTypeAux = "BOOL"
+    
+def p_between_id(p):
+    ''' between_id : ID '''
+    global betweenId
+    symbol = st.getByIndex(p[1])
+    if debug: print(f''' between_id : ID[{symbol.name}] ''')
+    definedVariable(symbol)
+    validOperationType(symbol)
+    betweenId = symbol.name
+    
+def p_between_min(p):
+    ''' between_min : expression '''
+    global betweenId, betweenMinJmp
+    if debug: print(f''' between_min : expression ''')
+    polaca.append(betweenId)
+    polaca.append("CMP")
+    polaca.append("JL")
+    betweenMinJmp = len(polaca)
+    polaca.append('_') # salto al final del between para asignar false
+    
+def p_between_max(p):
+    ''' between_max : expression '''
+    global betweenId, betweenMaxJmp
+    if debug: print(f''' between_max : expression ''')
+    polaca.append(betweenId)
+    polaca.append("CMP")
+    polaca.append("JG")
+    betweenMaxJmp = len(polaca)
+    polaca.append('_') # salto al final del between para asignar false
 
 
 ## ------------------------------ Assignment Statement
 def p_assignment_statement(p):
     ''' assignment_statement : ID OP_ASIGNACION assignment_value PUNTO_COMA '''
-    if debug: print(f''' assignment_statement : ID[{p[1]}] OP_ASIGNACION assignment_value[{p[3]}] PUNTO_COMA ''')
-    if info: print(f'assignment_statement: {p[3]}, {p[1]}, =')
-    # semantica de asignar valor a la variable
-    polaca.append(st.getByIndex(p[1]).name)
-    polaca.append(":=")
+    global operantionTypeAux
+    symbol = st.getByIndex(p[1])
+    if debug: print(f''' assignment_statement : ID[{symbol.name}] OP_ASIGNACION assignment_value PUNTO_COMA ''')
+    definedVariable(symbol)
+    validAssignmentType(symbol)
+    operantionTypeAux = None
+    
+    if symbol.typeOf == "STRING":
+        polaca.append("STRCPY")
+    else: polaca.append(":=")
+    polaca.append(symbol.name)
 
 def p_assignment_value_ternary(p):
     ''' assignment_value : ternary '''
-    if debug: print(f''' assignment_value : ternary[{p[1]}] ''')
+    if debug: print(f''' assignment_value : ternary ''')
     pass
 
 def p_assignment_value_expression(p):
     ''' assignment_value : expression '''
-    if debug: print(f''' assignment_value : expression[{p[1]}] ''')
-    if info: print(f'assignment_value: {p[1]}')
+    if debug: print(f''' assignment_value : expression ''')
+    pass
 
 def p_assignment_value_str(p):
     ''' assignment_value : str_expression '''
-    if debug: print(f''' assignment_value : str_expression[{p[1]}] ''')
+    if debug: print(f''' assignment_value : str_expression ''')
     pass
 
 def p_assignment_value_logical(p):
     ''' assignment_value : logical_statement '''
-    if debug: print(f''' assignment_value : logical_statement[{p[1]}] ''')
-    if info: print(f'assignment_value: {p[1]}')
-    polaca.append("logicalAux")
+    global operantionTypeAux
+    if debug: print(f''' assignment_value : logical_statement ''')
+    operantionTypeAux = "BOOL"
+    polaca.append("@logicalAux")
 
 ### ----------------------------------- Ternary Operator
+def p_ternary_condition(p):
+    ''' ternary_condition : logical_statement '''
+    global ternaryJmpToFalseAux
+    if debug: print(f''' ternary_condition : logical_statement ''')
+    polaca.append("_TRUE")
+    polaca.append("@logicalAux")
+    polaca.append("CMP")
+    polaca.append("JZ")
+    ternaryJmpToFalseAux = len(polaca)
+    polaca.append("_")
+    
+def p_ternary_true_num_value(p):
+    ''' ternary_true_value : expression '''
+    global ternaryJmpToFalseAux, ternaryJmpToEndAux
+    if debug: print(f''' ternary_true_value : expression ''')
+    polaca.append("J")
+    ternaryJmpToEndAux = len(polaca)
+    polaca.append("_")
+    polaca[ternaryJmpToFalseAux] = f"[{len(polaca)}]"
+    
+def p_ternary_true_str_value(p):
+    ''' ternary_true_value : str_expression '''
+    global ternaryJmpToFalseAux, ternaryJmpToEndAux
+    if debug: print(f''' ternary_true_value : str_expression ''')
+    polaca.append("J")
+    ternaryJmpToEndAux = len(polaca)
+    polaca.append("_")
+    polaca[ternaryJmpToFalseAux] = f"[{len(polaca)}]"
+
 def p_ternary_num(p):
-    ''' ternary : logical_statement CONDICION_TERNARIA expression DOS_PUNTOS expression '''
-    if debug: print(f''' ternary : logical_statement[{p[1]}] CONDICION_TERNARIA expression[{p[3]}] DOS_PUNTOS expression[{p[5]}] ''')
-    pass
+    ''' ternary : ternary_condition CONDICION_TERNARIA ternary_true_value DOS_PUNTOS expression '''
+    global ternaryJmpToEndAux
+    if debug: print(f''' ternary : ternary_condition CONDICION_TERNARIA ternary_true_value DOS_PUNTOS expression ''')
+    polaca[ternaryJmpToEndAux] = f"[{len(polaca)}]"
 
 def p_ternary_str(p):
-    ''' ternary : logical_statement CONDICION_TERNARIA str_expression DOS_PUNTOS str_expression '''
-    if debug: print(f''' ternary : logical_statement[{p[1]}] CONDICION_TERNARIA str_expression[{p[3]}] DOS_PUNTOS str_expression[{p[5]}] ''')
-    pass
+    ''' ternary : ternary_condition CONDICION_TERNARIA ternary_true_value DOS_PUNTOS str_expression '''
+    global ternaryJmpToEndAux
+    if debug: print(f''' ternary : ternary_condition CONDICION_TERNARIA ternary_true_value DOS_PUNTOS str_expression ''')
+    polaca[ternaryJmpToEndAux] = f"[{len(polaca)}]"
 
 
 ## ------------------------------ Error Rule
@@ -481,7 +705,14 @@ def p_error(e):
 
 
 def parse(source):
+    print("Comienzo de Sintactico...\n")
     parser = yacc.yacc()  
     res = parser.parse(input=source, lexer=lexico.Lexer())
-    print(st)
+    print(f'\n- Polaca: \n{res}\n')
+    if debug and res:
+        print(f'- Simbolos: \n{st}')
+        print(f'- Polaca Detallada:')
+        for i, c in enumerate(res):
+            print(f'[{i}] \t{c}')
+    print("\n...Fin de Sintactico")
     return res

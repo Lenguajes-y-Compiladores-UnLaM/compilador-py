@@ -1,6 +1,7 @@
 var {
     int potencia, cont;
     real valor, acum;
+    bool flag;
 }
 
 out "Ingresar valor: ";
@@ -12,7 +13,7 @@ in potencia;
 /* Esto es otro comentario matador */
 
 if potencia == 0 {
-    acum = 1;
+    acum = 1.1;
 } else if potencia == 1 {
     acum = valor;
 } else {

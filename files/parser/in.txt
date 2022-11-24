@@ -1,5 +1,7 @@
 var {
-    string name;
+    string s;
 }
 
-in name;
+out "Ingrese un texto";
+in s;
+out "El text es " ++ s;

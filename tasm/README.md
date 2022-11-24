@@ -1,0 +1,1 @@
+Esta carpeta es para guardar las dependencias del turbo assembler y el ejecutable de la gui, ademas de un breve instructivo de como usarlo

@@ -1,1 +1,4 @@
-v1 = false || true;
+var {
+    bool v1;
+}
+v1 = false && true;

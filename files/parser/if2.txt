@@ -1,5 +1,10 @@
+var {
+    int num1, v1;
+}
+
 if num1 < 10 {
     v1 = 3;
 } else {
     v1 = 6;
 }
+out v1;

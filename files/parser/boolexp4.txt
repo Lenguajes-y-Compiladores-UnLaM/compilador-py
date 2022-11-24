@@ -1,1 +1,5 @@
+var {
+    bool v1;
+}
+
 v1 = "hola" != "chau";

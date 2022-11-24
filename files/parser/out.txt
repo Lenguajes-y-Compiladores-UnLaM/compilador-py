@@ -1,1 +1,5 @@
-out "hola mundo";
+var {
+    real a;
+}
+a = 303.12313;
+out a;

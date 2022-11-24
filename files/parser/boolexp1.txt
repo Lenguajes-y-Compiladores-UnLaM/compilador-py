@@ -1,1 +1,6 @@
-v1 = 10 > 5;
+var {
+    bool v1;
+    string a;
+}
+v1 = !10 > 5 && 3.1 != 1.1;
+a = "jholasd" ++ v1;
