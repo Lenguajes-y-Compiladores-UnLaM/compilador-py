@@ -1,7 +1,7 @@
 import sys
 from parser import yacc
 from lex import lexico, symbols_table
-from flags import debug
+from flags import debug, info
 
 st = symbols_table.SymbolsTable()
 
@@ -117,7 +117,7 @@ def p_variables_names(p):
     if debug: print(f''' variables_names : ID[{symbol.name}] ''')
     symbol.typeOf = variableTypeAux
     symbol.value = defaultValueAux
-=======
+
     if info: print(f''' variable_declaration : {p[1]} {st.getByIndex(p[2])} ''')
     p[0] = p[1]
 
